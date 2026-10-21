@@ -8,11 +8,12 @@ import (
 )
 
 type model struct {
+	header         string
 	welcomeMessage string
 	textInput      string
 	chat           map[user]message
 	sidebar        []user
-	chatbox        string
+	inputBox       string
 }
 
 type user struct {
@@ -29,13 +30,6 @@ type userInput struct {
 	input string
 }
 
-type successMsg struct {
-	MessageID string
-}
-
-type errorMsg struct {
-	err error
-}
 
 func (m message) SendMessage(msg string) message {
 	sentMessage := message{
@@ -51,7 +45,7 @@ func initialModel() model {
 		welcomeMessage: "Welcome! Type /help for commands. Ctrl+C to leave.",
 		chat:           map[user]message{},
 		sidebar:        []user{},
-		chatbox:        "",
+		inputBox:       "",
 	}
 }
 
@@ -62,14 +56,7 @@ func (m model) Init() tea.Cmd {
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
-		switch msg.String() {
-		case "enter":
-			userText := m.textInput
-
-			return m, nil
-		}
-	}
-	return m, nil
+		
 }
 
 func (m model) View() tea.View {
