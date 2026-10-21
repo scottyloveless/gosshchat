@@ -1,19 +1,24 @@
 package main
 
 import (
+	"fmt"
+	"os"
 	"time"
 	"uuid"
 
-	tea "github.com/charmbracelet/bubbletea"
+	tea "charm.land/bubbletea/v2"
+	"github.com/charmbracelet/bubbles/textarea"
+	"github.com/charmbracelet/bubbles/viewport"
+	"github.com/charmbracelet/lipgloss"
 )
 
 type model struct {
-	header         string
-	welcomeMessage string
-	textInput      string
-	chat           map[user]message
-	sidebar        []user
-	inputBox       string
+	viewport    viewport.Model
+	chat        map[user]message
+	sidebar     viewport.Model
+	inputBox    textarea.Model
+	senderStyle lipgloss.Style
+	err         error
 }
 
 type user struct {
@@ -30,7 +35,6 @@ type userInput struct {
 	input string
 }
 
-
 func (m message) SendMessage(msg string) message {
 	sentMessage := message{
 		timestamp: time.Now(),
@@ -41,11 +45,23 @@ func (m message) SendMessage(msg string) message {
 }
 
 func initialModel() model {
+	vp := viewport.New(30, 5)
+	vp.MouseWheelEnabled = true
+	vp.AtTop()
+	vp.SetContent(`Welcome!
+	Type a message and hit enter to send a message.`)
+
+	sb := viewport.New(3, 2)
+
+	ta := textarea.New()
+
 	return model{
-		welcomeMessage: "Welcome! Type /help for commands. Ctrl+C to leave.",
-		chat:           map[user]message{},
-		sidebar:        []user{},
-		inputBox:       "",
+		viewport:    vp,
+		chat:        map[user]message{},
+		sidebar:     sb,
+		inputBox:    ta,
+		senderStyle: lipgloss.Style{},
+		err:         nil,
 	}
 }
 
@@ -54,19 +70,27 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	switch msg := msg.(type) {
-	case tea.KeyMsg:
-		
+	// switch msg := msg.(type) {
+	// case tea.KeyMsg:
+	// }
+	return m, nil
 }
 
 func (m model) View() tea.View {
+	viewportView := m.viewport.View()
+	v := tea.NewView(viewportView + "\n" + m.inputBox.View())
+	// c := m.inputBox.Cursor()
+	// if c != nil {
+	// 	c.Y += lipgloss.Height(viewportView)
+	// }
+	// v.Cursor = c
+	v.AltScreen = true
+	return v
 }
 
 func main() {
-	var chatHistory map[user]message
-
-	var loggedInUsers []user
-
-	var chatbox string
-	tea.ClearScreen()
+	p := tea.NewProgram(initialModel())
+	if _, err := p.Run(); err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+	}
 }
