@@ -84,7 +84,7 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		default:
 			var cmd tea.Cmd
-			m.inputBox, cmd = m.inputBox.Update(msg)
+			m.textarea, cmd = m.inputBox.Update(msg)
 			return m, cmd
 		}
 	}
