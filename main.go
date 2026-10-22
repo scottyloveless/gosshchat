@@ -35,7 +35,7 @@ type userInput struct {
 	input string
 }
 
-func (m message) SendMessage(msg string) message {
+func SendMessage(msg string) message {
 	sentMessage := message{
 		timestamp: time.Now(),
 		text:      msg,
@@ -45,15 +45,16 @@ func (m message) SendMessage(msg string) message {
 }
 
 func initialModel() model {
-	vp := viewport.New(30, 5)
+	vp := viewport.New(200, 50)
 	vp.MouseWheelEnabled = true
 	vp.AtTop()
 	vp.SetContent(`Welcome!
 	Type a message and hit enter to send a message.`)
 
-	sb := viewport.New(3, 2)
+	sb := viewport.New(50, 200)
 
 	ta := textarea.New()
+	ta.Focus()
 
 	return model{
 		viewport:    vp,
@@ -70,9 +71,23 @@ func (m model) Init() tea.Cmd {
 }
 
 func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
-	// switch msg := msg.(type) {
-	// case tea.KeyMsg:
-	// }
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "ctrl+c", "q":
+			return m, tea.Quit
+
+		case "enter":
+			if m.inputBox.Value() != "" {
+				SendMessage(m.inputBox.Value())
+				return m, nil
+			}
+		default:
+			var cmd tea.Cmd
+			m.inputBox, cmd = m.inputBox.Update(msg)
+			return m, cmd
+		}
+	}
 	return m, nil
 }
 
